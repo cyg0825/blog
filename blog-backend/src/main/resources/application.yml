@@ -1,0 +1,40 @@
+spring:
+  profiles:
+    active: mysql
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    open-in-view: false
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+server:
+  port: 8081
+
+jwt:
+  secret: BlogSystemSecretKey2026BlogSystemSecretKey2026BlogSystemSecretKey2026
+  expiration: 86400000
+
+ai:
+  api-url: https://api.kksj.org/v1/chat/completions
+  api-key: sk-GCou7QCfM3bgrgYBeA5luRKBnVY86xTxcYBPctAwL1tdCsHX
+  model: deepseek-v3
+
+# 文件上传路径配置
+file:
+  upload:
+    path: /Users/cc/Downloads/项目/blog/blog-backend/files
+
+logging:
+  level:
+    com.blog: INFO
+    org.springframework.security: WARN

@@ -1,0 +1,706 @@
+API_KEY:sk-GCou7QCfM3bgrgYBeA5luRKBnVY86xTxcYBPctAwL1tdCsHX
+文档地址https://s.apifox.cn/299926cc-2578-4b62-a197-3ff757d5f779
+就是评论区接入 ai 审查，blog 详细页面加入 ai 总结。总之就是利用上ai的东西
+# 请求代码示例
+## 一、非流式接入（Synchronous）
+```python
+import requests
+def get_chat_gpt_response(prompt):
+    url = "https://api.kksj.org/v1/chat/completions"
+    headers = {
+        "Authorization": "Bearer YOUR_OPENAI_API_KEY",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "gpt-3.5-turbo",
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
+    }
+    response = requests.post(url, headers=headers, json=data)
+    return response.json()
+# 使用示例
+response = get_chat_gpt_response("Hello, how are you?")
+print(response)
+```
+---
+## 二、流式接入（Streaming）
+```python
+import requests
+import json
+headers = {
+    'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
+    'Content-Type': 'application/json'
+}
+data = {
+    'model': 'gpt-3.5-turbo',
+    'messages': [
+        {'role': 'system', 'content': 'You are a helpful assistant.'},
+        {'role': 'user', 'content': 'Tell me a joke.'}
+    ],
+    "stream": True
+}
+with requests.post('https://api.kksj.org/v1/chat/completions', headers=headers, json=data, stream=True) as response:
+    for line in response.iter_lines():
+        # 忽略 keep-alive 新行
+        if line:
+            decoded_line = line.decode('utf-8')
+            if decoded_line == 'data: [DONE]':
+                break
+            if decoded_line.startswith('data: '):
+                data_str = decoded_line[len('data: '):]
+                data_json = json.loads(data_str)
+                # 检查 choices 是否为空
+                choices = data_json.get('choices', [])
+                if not choices:
+                    continue
+                finish_reason = choices[0].get('finish_reason', '')
+                if finish_reason == 'stop':
+                    break
+
+                # 检查 delta 是否存在并获取 content
+                delta = choices[0].get('delta', {})
+                content = delta.get('content', '')
+                if content:
+                    print(f'{content}', end="")
+    print()
+print('stream end')
+```
+# 发出请求
+您可以将下面的命令粘贴到您的终端中以运行您的第一个 API 请求。确保替换`YOUR_API_KEY`为您的在[kksjAPI](https://api.kksj.org)后台生成的令牌（sk-xxx）。
+```bash
+1 curl https://api.kksi.org/v1/chat/completions \
+2   -H 'Content-Type: application/json' \
+3   -H 'Authorization: Bearer YOUR_API_KEY' \
+4   -d '{
+5   "model": "gpt-3.5-turbo",
+6   "messages": [{"role": "user", "content": "Say this is a test!"}],
+7   "temperature": 0.7
+8 }'
+```
+此请求查询模型以完成以提示“ *Say this is a test*`gpt-3.5-turbo` ”开头的文本。您应该会收到类似于以下内容的响应：
+```json
+
+1 {
+2    "id":"chatcmpl-abc123",
+3    "object":"chat.completion",
+4    "created":1677858242,
+5    "model":"gpt-3.5-turbo-0301",
+6    "usage":{
+7       "prompt_tokens":13,
+8       "completion_tokens":7,
+9       "total_tokens":20
+10    },
+11    "choices":[
+12       {
+13          "message":{
+14             "role":"assistant",
+15             "content":"\n\nThis is a test!"
+16          },
+17          "finish_reason":"stop",
+18          "index":0
+19       }
+20    ]
+21 }
+```
+现在你已经生成了你的第一个聊天完成。我们可以看到`finish_reason`is`stop`这意味着 API 返回了模型生成的完整完成。在上面的请求中，我们只生成了一条消息，但是你可以设置参数`n`来生成多条消息选择。在这个例子中，`gpt-3.5-turbo`更多的是用于传统的[文本完成任务](https://platform.openai.com/docs/guides/completion/introduction)。该模型还针对[聊天应用程序](https://platform.openai.com/docs/guides/chat)进行了优化。
+# 列出模型
+## OpenAPI Specification
+```yaml
+openapi: 3.0.1
+info:
+  title: ''
+  description: ''
+  version: 1.0.0
+paths:
+  /v1/models:
+    get:
+      summary: 列出模型
+      deprecated: false
+      description: >+
+        列出并描述 API
+        中可用的各种模型。您可以参考[模型](https://platform.openai.com/docs/models)文档以了解可用的模型以及它们之间的区别。
+        列出当前可用的模型，并提供有关每个模型的基本信息，例如所有者和可用性。
+      tags:
+        - 模型接口/模型（Models）
+      parameters:
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: Bearer {{YOUR_API_KEY}}
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        object:
+                          type: string
+                        owned_by:
+                          type: string
+                        permission:
+                          type: array
+                          items:
+                            type: string
+                      required:
+                        - id
+                        - object
+                        - owned_by
+                        - permission
+                      x-apifox-orders:
+                        - id
+                        - object
+                        - owned_by
+                        - permission
+                  object:
+                    type: string
+                required:
+                  - data
+                  - object
+                x-apifox-orders:
+                  - data
+                  - object
+              example: |-
+                {
+                  "data": [
+                    {
+                      "id": "model-id-0",
+                      "object": "model",
+                      "owned_by": "organization-owner",
+                      "permission": [...]
+                    },
+                    {
+                      "id": "model-id-1",
+                      "object": "model",
+                      "owned_by": "organization-owner",
+                      "permission": [...]
+                    },
+                    {
+                      "id": "model-id-2",
+                      "object": "model",
+                      "owned_by": "openai",
+                      "permission": [...]
+                    }
+                  ],
+                  "object": "list"
+                }
+          headers: {}
+          x-apifox-name: List models
+      security: []
+      x-apifox-folder: 模型接口/模型（Models）
+      x-apifox-status: released
+      x-run-in-apifox: https://app.apifox.com/web/project/4366470/apis/api-167056065-run
+components:
+  schemas: {}
+  securitySchemes: {}
+servers:
+  - url: https://api.kksj.org
+    description: 正式环境
+security: []
+```
+# 聊天接口（通用）
+## OpenAPI Specification
+```yaml
+openapi: 3.0.1
+info:
+  title: ''
+  description: ''
+  version: 1.0.0
+paths:
+  /v1/chat/completions:
+    post:
+      summary: 聊天接口（通用）
+      deprecated: false
+      description: |+
+        给定一个提示，该模型将返回一个或多个预测的完成，并且还可以返回每个位置的替代标记的概率。
+        为提供的提示和参数创建完成
+      tags:
+        - 模型接口/聊天接口（Chat）
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: Bearer {{YOUR_API_KEY}}
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model:
+                  type: string
+                  description: >-
+                    要使用的模型的 ID。有关哪些模型适用于聊天 API
+                    的详细信息，请参阅[模型端点兼容性表。](https://platform.openai.com/docs/models/model-endpoint-compatibility)
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      role:
+                        type: string
+                      content:
+                        type: string
+                    x-apifox-orders:
+                      - role
+                      - content
+                  description: >-
+                    以[聊天格式](https://platform.openai.com/docs/guides/chat/introduction)生成聊天完成的消息。
+                temperature:
+                  type: integer
+                  description: >-
+                    使用什么采样温度，介于 0 和 2 之间。较高的值（如 0.8）将使输出更加随机，而较低的值（如
+                    0.2）将使输出更加集中和确定。  我们通常建议改变这个或`top_p`但不是两者。
+                top_p:
+                  type: integer
+                  description: >-
+                    一种替代温度采样的方法，称为核采样，其中模型考虑具有 top_p 概率质量的标记的结果。所以 0.1 意味着只考虑构成前
+                    10% 概率质量的标记。  我们通常建议改变这个或`temperature`但不是两者。
+                'n':
+                  type: integer
+                  description: 为每个输入消息生成多少个聊天完成选项。
+                stream:
+                  type: boolean
+                  description: >-
+                    如果设置，将发送部分消息增量，就像在 ChatGPT
+                    中一样。当令牌可用时，令牌将作为纯数据[服务器发送事件](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format)`data:
+                    [DONE]`发送，流由消息终止。[有关示例代码](https://github.com/openai/openai-cookbook/blob/main/examples/How_to_stream_completions.ipynb)，请参阅
+                    OpenAI Cookbook 。
+                stop:
+                  type: string
+                  description: API 将停止生成更多令牌的最多 4 个序列。
+                max_tokens:
+                  type: integer
+                  description: 聊天完成时生成的最大令牌数。  输入标记和生成标记的总长度受模型上下文长度的限制。
+                presence_penalty:
+                  type: number
+                  description: >-
+                    -2.0 和 2.0 之间的数字。正值会根据到目前为止是否出现在文本中来惩罚新标记，从而增加模型谈论新主题的可能性。 
+                    [查看有关频率和存在惩罚的更多信息。](https://platform.openai.com/docs/api-reference/parameter-details)
+                frequency_penalty:
+                  type: number
+                  description: >-
+                    -2.0 和 2.0 之间的数字。正值会根据新标记在文本中的现有频率对其进行惩罚，从而降低模型逐字重复同一行的可能性。 
+                    [查看有关频率和存在惩罚的更多信息。](https://platform.openai.com/docs/api-reference/parameter-details)
+                logit_bias:
+                  type: 'null'
+                  description: >-
+                    修改指定标记出现在完成中的可能性。  接受一个 json 对象，该对象将标记（由标记器中的标记 ID 指定）映射到从
+                    -100 到 100 的关联偏差值。从数学上讲，偏差会在采样之前添加到模型生成的 logits
+                    中。确切的效果因模型而异，但 -1 和 1 之间的值应该会减少或增加选择的可能性；像 -100 或 100
+                    这样的值应该导致相关令牌的禁止或独占选择。
+                user:
+                  type: string
+                  description: >-
+                    代表您的最终用户的唯一标识符，可以帮助 OpenAI
+                    监控和检测滥用行为。[了解更多](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids)。
+              required:
+                - model
+                - messages
+              x-apifox-orders:
+                - model
+                - messages
+                - temperature
+                - top_p
+                - 'n'
+                - stream
+                - stop
+                - max_tokens
+                - presence_penalty
+                - frequency_penalty
+                - logit_bias
+                - user
+            example:
+              model: gpt-3.5-turbo
+              messages:
+                - role: user
+                  content: Hello!
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  object:
+                    type: string
+                  created:
+                    type: integer
+                  choices:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        index:
+                          type: integer
+                        message:
+                          type: object
+                          properties:
+                            role:
+                              type: string
+                            content:
+                              type: string
+                          required:
+                            - role
+                            - content
+                          x-apifox-orders:
+                            - role
+                            - content
+                        finish_reason:
+                          type: string
+                      x-apifox-orders:
+                        - index
+                        - message
+                        - finish_reason
+                  usage:
+                    type: object
+                    properties:
+                      prompt_tokens:
+                        type: integer
+                      completion_tokens:
+                        type: integer
+                      total_tokens:
+                        type: integer
+                    required:
+                      - prompt_tokens
+                      - completion_tokens
+                      - total_tokens
+                    x-apifox-orders:
+                      - prompt_tokens
+                      - completion_tokens
+                      - total_tokens
+                required:
+                  - id
+                  - object
+                  - created
+                  - choices
+                  - usage
+                x-apifox-orders:
+                  - id
+                  - object
+                  - created
+                  - choices
+                  - usage
+              example:
+                id: chatcmpl-123
+                object: chat.completion
+                created: 1677652288
+                choices:
+                  - index: 0
+                    message:
+                      role: assistant
+                      content: |-
+
+
+                        Hello there, how may I assist you today?
+                    finish_reason: stop
+                usage:
+                  prompt_tokens: 9
+                  completion_tokens: 12
+                  total_tokens: 21
+          headers: {}
+          x-apifox-name: OK
+      security: []
+      x-apifox-folder: 模型接口/聊天接口（Chat）
+      x-apifox-status: released
+      x-run-in-apifox: https://app.apifox.com/web/project/4366470/apis/api-167056066-run
+components:
+  schemas: {}
+  securitySchemes: {}
+servers:
+  - url: https://api.kksj.org
+    description: 正式环境
+security: []
+
+```
+
+# openai 图片分析
+
+## OpenAPI Specification
+
+```yaml
+openapi: 3.0.1
+info:
+  title: ''
+  description: ''
+  version: 1.0.0
+paths:
+  /v1/chat/completions:
+    post:
+      summary: openai 图片分析
+      deprecated: false
+      description: |+
+        给定一个提示，该模型将返回一个或多个预测的完成，并且还可以返回每个位置的替代标记的概率。
+
+        为提供的提示和参数创建完成
+
+      tags:
+        - 模型接口/聊天接口（Chat）
+      parameters:
+        - name: Content-Type
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: ''
+          required: true
+          example: application/json
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          required: false
+          example: Bearer {{YOUR_API_KEY}}
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model:
+                  type: string
+                  description: >-
+                    要使用的模型的 ID。有关哪些模型适用于聊天 API
+                    的详细信息，请参阅[模型端点兼容性表。](https://platform.openai.com/docs/models/model-endpoint-compatibility)
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      role:
+                        type: string
+                      content:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              description: text或者image_url
+                            text或image_url:
+                              type: string
+                          x-apifox-orders:
+                            - type
+                            - text或image_url
+                    x-apifox-orders:
+                      - role
+                      - content
+                  description: >-
+                    以[聊天格式](https://platform.openai.com/docs/guides/chat/introduction)生成聊天完成的消息。
+                temperature:
+                  type: integer
+                  description: >-
+                    使用什么采样温度，介于 0 和 2 之间。较高的值（如 0.8）将使输出更加随机，而较低的值（如
+                    0.2）将使输出更加集中和确定。  我们通常建议改变这个或`top_p`但不是两者。
+                top_p:
+                  type: integer
+                  description: >-
+                    一种替代温度采样的方法，称为核采样，其中模型考虑具有 top_p 概率质量的标记的结果。所以 0.1 意味着只考虑构成前
+                    10% 概率质量的标记。  我们通常建议改变这个或`temperature`但不是两者。
+                'n':
+                  type: integer
+                  description: 为每个输入消息生成多少个聊天完成选项。
+                stream:
+                  type: boolean
+                  description: >-
+                    如果设置，将发送部分消息增量，就像在 ChatGPT
+                    中一样。当令牌可用时，令牌将作为纯数据[服务器发送事件](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format)`data:
+                    [DONE]`发送，流由消息终止。[有关示例代码](https://github.com/openai/openai-cookbook/blob/main/examples/How_to_stream_completions.ipynb)，请参阅
+                    OpenAI Cookbook 。
+                stop:
+                  type: string
+                  description: API 将停止生成更多令牌的最多 4 个序列。
+                max_tokens:
+                  type: integer
+                  description: 聊天完成时生成的最大令牌数。  输入标记和生成标记的总长度受模型上下文长度的限制。
+                presence_penalty:
+                  type: number
+                  description: >-
+                    -2.0 和 2.0 之间的数字。正值会根据到目前为止是否出现在文本中来惩罚新标记，从而增加模型谈论新主题的可能性。 
+                    [查看有关频率和存在惩罚的更多信息。](https://platform.openai.com/docs/api-reference/parameter-details)
+                frequency_penalty:
+                  type: number
+                  description: >-
+                    -2.0 和 2.0 之间的数字。正值会根据新标记在文本中的现有频率对其进行惩罚，从而降低模型逐字重复同一行的可能性。 
+                    [查看有关频率和存在惩罚的更多信息。](https://platform.openai.com/docs/api-reference/parameter-details)
+                logit_bias:
+                  type: 'null'
+                  description: >-
+                    修改指定标记出现在完成中的可能性。  接受一个 json 对象，该对象将标记（由标记器中的标记 ID 指定）映射到从
+                    -100 到 100 的关联偏差值。从数学上讲，偏差会在采样之前添加到模型生成的 logits
+                    中。确切的效果因模型而异，但 -1 和 1 之间的值应该会减少或增加选择的可能性；像 -100 或 100
+                    这样的值应该导致相关令牌的禁止或独占选择。
+                user:
+                  type: string
+                  description: >-
+                    代表您的最终用户的唯一标识符，可以帮助 OpenAI
+                    监控和检测滥用行为。[了解更多](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids)。
+              required:
+                - model
+                - messages
+              x-apifox-orders:
+                - model
+                - messages
+                - temperature
+                - top_p
+                - 'n'
+                - stream
+                - stop
+                - max_tokens
+                - presence_penalty
+                - frequency_penalty
+                - logit_bias
+                - user
+            example:
+              model: gpt-4o
+              messages:
+                - role: user
+                  content:
+                    - type: text
+                      text: What is in this image?
+                    - type: image_url
+                      image_url:
+                        url: >-
+                          https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg
+              max_tokens: 300
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  object:
+                    type: string
+                  created:
+                    type: integer
+                  choices:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        index:
+                          type: integer
+                        message:
+                          type: object
+                          properties:
+                            role:
+                              type: string
+                            content:
+                              type: string
+                          required:
+                            - role
+                            - content
+                          x-apifox-orders:
+                            - role
+                            - content
+                        finish_reason:
+                          type: string
+                      x-apifox-orders:
+                        - index
+                        - message
+                        - finish_reason
+                  usage:
+                    type: object
+                    properties:
+                      prompt_tokens:
+                        type: integer
+                      completion_tokens:
+                        type: integer
+                      total_tokens:
+                        type: integer
+                    required:
+                      - prompt_tokens
+                      - completion_tokens
+                      - total_tokens
+                    x-apifox-orders:
+                      - prompt_tokens
+                      - completion_tokens
+                      - total_tokens
+                required:
+                  - id
+                  - object
+                  - created
+                  - choices
+                  - usage
+                x-apifox-orders:
+                  - id
+                  - object
+                  - created
+                  - choices
+                  - usage
+              example:
+                id: chatcmpl-123
+                object: chat.completion
+                created: 1677652288
+                choices:
+                  - index: 0
+                    message:
+                      role: assistant
+                      content: |-
+
+
+                        Hello there, how may I assist you today?
+                    finish_reason: stop
+                usage:
+                  prompt_tokens: 9
+                  completion_tokens: 12
+                  total_tokens: 21
+          headers: {}
+          x-apifox-name: OK
+      security: []
+      x-apifox-folder: 模型接口/聊天接口（Chat）
+      x-apifox-status: released
+      x-run-in-apifox: https://app.apifox.com/web/project/4366470/apis/api-167056071-run
+components:
+  schemas: {}
+  securitySchemes: {}
+servers:
+  - url: https://api.kksj.org
+    description: 正式环境
+security: []
+
+```
