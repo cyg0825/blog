@@ -27,7 +27,7 @@
             <div class="metric-label">{{ item.label }}</div>
           </div>
           <div class="metric-badge" :style="{ backgroundColor: item.color + '20', color: item.color }">
-            <el-icon :size="12"><TrendingUp /></el-icon>
+            <el-icon :size="12"><Top /></el-icon>
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { adminApi } from '@/api'
-import { TrendingUp } from '@element-plus/icons-vue'
+import { Top } from '@element-plus/icons-vue'
 
 const stats = ref({})
 
@@ -107,7 +107,7 @@ const statItems = [
   { key: 'totalUsers', label: '注册用户', icon: 'User', color: '#409eff' },
   { key: 'totalArticles', label: '文章总数', icon: 'Document', color: '#67c23a' },
   { key: 'totalComments', label: '评论总数', icon: 'ChatLineRound', color: '#e6a23c' },
-  { key: 'publishedArticles', label: '已发布文章', icon: 'DocumentChecked', color: '#9b59b6' }
+  { key: 'publishedArticles', label: '已发布文章', icon: 'Reading', color: '#9b59b6' }
 ]
 
 const aiPassRate = computed(() => {

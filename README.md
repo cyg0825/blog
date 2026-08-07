@@ -90,6 +90,44 @@
 
 ---
 
+## 项目截图
+
+### 用户端
+
+<p align="center">
+  <img src="./img/首页.png" alt="首页" width="48%" />
+  <img src="./img/深色背景.png" alt="深色模式" width="48%" />
+</p>
+
+<p align="center">
+  <img src="./img/登录页面.png" alt="登录页面" width="32%" />
+  <img src="./img/注册页面.png" alt="注册页面" width="32%" />
+  <img src="./img/文章页.png" alt="文章详情" width="32%" />
+</p>
+
+<p align="center">
+  <img src="./img/个人资料页面.png" alt="个人资料" width="48%" />
+  <img src="./img/写文章页.png" alt="写文章" width="48%" />
+</p>
+
+### 管理后台
+
+<p align="center">
+  <img src="./img/数据概览页面.png" alt="数据概览" width="48%" />
+  <img src="./img/用户管理.png" alt="用户管理" width="48%" />
+</p>
+
+<p align="center">
+  <img src="./img/文章管理.png" alt="文章管理" width="48%" />
+  <img src="./img/评论管理.png" alt="评论管理" width="48%" />
+</p>
+
+<p align="center">
+  <img src="./img/系统管理.png" alt="系统管理" width="100%" />
+</p>
+
+---
+
 ## 快速开始
 
 ### 环境要求

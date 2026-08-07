@@ -21,7 +21,7 @@ server:
   port: 8081
 
 jwt:
-  secret: ${JWT_SECRET:BlogSystemSecretKeyChangeMe}
+  secret: ${JWT_SECRET:BlogSystemSecretKeyChangeMe2024Secure}
   expiration: 86400000
 
 ai:
