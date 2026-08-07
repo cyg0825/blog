@@ -48,7 +48,6 @@
 - **路由**: Vue Router 4.3.0
 - **HTTP客户端**: Axios 1.6.8
 - **富文本编辑器**: wangEditor 5.1.23
-- **富文本编辑器**: wangEditor 5.1.23
 - **代码高亮**: highlight.js 11.9.0
 - **日期处理**: dayjs 1.11.10
 - **样式**: CSS3 + CSS变量（主题系统）
@@ -59,8 +58,8 @@
 - **语言**: Java 17
 - **数据持久化**: Spring Data JPA
 - **安全认证**: Spring Security + JWT
-- **数据库**: MySQL（默认配置）
-- **AI集成**: 深度求索AI模型集成
+- **数据库**: H2（默认，零配置）/ MySQL（可选）
+- **AI集成**: 深度求索AI模型集成（可选）
 - **构建工具**: Maven
 
 ---
@@ -97,21 +96,60 @@
 - JDK 17+
 - Node.js 18+
 - Maven 3.6+
-- MySQL 8.0+（推荐）
 
-### 数据库配置
-1. 创建MySQL数据库：`blog_system`
-2. 修改 `blog-backend/src/main/resources/application-mysql.yml` 中的数据库连接信息
+### 方式一：H2 零配置启动（推荐，开箱即用）
 
-### 后端启动
+系统默认使用 H2 内存数据库，无需安装任何数据库，启动即可运行：
+
 ```bash
+# 后端启动（H2 模式，零配置）
 cd blog-backend
 mvn spring-boot:run
 ```
 
+后端启动后，H2 控制台可通过 http://localhost:8081/h2-console 访问（JDBC URL: `jdbc:h2:mem:blogdb`）。
+
+### 方式二：MySQL 启动（可选）
+
+如需使用 MySQL 持久化数据：
+
+1. 创建数据库：`blogdb`（注意：应用会自动建表，数据库名与 `application-mysql.yml` 中一致）
+2. 复制根目录 `.env.example` 为 `.env.local`，填写数据库账号密码：
+
+```bash
+cp .env.example .env.local
+# 编辑 .env.local，填写 DB_USERNAME 和 DB_PASSWORD
+```
+
+3. 使用 MySQL profile 启动：
+
+```bash
+cd blog-backend
+SPRING_PROFILES_ACTIVE=mysql mvn spring-boot:run
+```
+
+### 配置 AI 功能（可选）
+
+AI 功能（评论智能审核、文章 AI 总结）默认关闭。如需启用：
+
+1. 在 `.env.local` 中填写 AI 配置：
+
+```bash
+# 编辑 .env.local，填写 AI_API_KEY
+```
+
+或直接通过环境变量启动：
+
+```bash
+AI_API_KEY=your_key_here mvn spring-boot:run
+```
+
 ### 前端启动
+
 ```bash
 cd blog-frontend
+cp .env.example .env.local
+# 编辑 .env.local，确认 VITE_API_BASE_URL=http://localhost:8081
 npm install
 npm run dev
 ```
@@ -122,8 +160,9 @@ npm run dev
 
 - **前端应用**: http://localhost:3000
 - **后端API**: http://localhost:8081
+- **H2控制台**: http://localhost:8081/h2-console（仅 H2 模式）
 - **默认管理员账号**: admin / admin123
-- **AI功能**: 深度求索AI模型集成（已配置）
+- **AI功能**: 需配置 API Key 后启用（评论智能审核、文章AI总结）
 
 ---
 
@@ -156,7 +195,7 @@ blog/
 │   │   └── views/             # 页面组件
 │   ├── vite.config.js         # Vite配置
 │   └── package.json           # 依赖配置
-├── ai接入文档.txt              # AI功能说明文档
+├── ai接入文档.txt              # AI接入参考文档（含敏感信息，已gitignore）
 └── README.md                  # 项目说明
 ```
 
@@ -184,14 +223,14 @@ blog/
 ## 部署说明
 
 ### 开发环境
-- 数据库: MySQL 8.0+（默认配置）
+- 数据库: H2（默认）或 MySQL 8.0+（可选）
 - 端口: 前端3000，后端8081
-- AI服务: 深度求索AI模型（已配置API密钥）
+- AI服务: 可选，需自行配置 API Key
 
 ### 生产环境
 - 数据库: MySQL 8.0+
-- 配置: 修改application-mysql.yml中的数据库连接信息
-- AI服务: 可配置其他AI模型或使用本地模型
+- 配置: 修改 `.env.local` 中的数据库连接信息或 `application-mysql.yml`
+- AI服务: 可配置 AI 模型 API Key 或使用本地模型
 
 ---
 

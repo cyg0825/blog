@@ -21,21 +21,18 @@ server:
   port: 8081
 
 jwt:
-  secret: BlogSystemSecretKey2026BlogSystemSecretKey2026BlogSystemSecretKey2026
+  secret: ${JWT_SECRET:BlogSystemSecretKeyChangeMe}
   expiration: 86400000
 
 ai:
-#  api-url: https://api.kksj.org/v1/chat/completions
-#  api-key: sk-GCou7QCfM3bgrgYBeA5luRKBnVY86xTxcYBPctAwL1tdCsHX
-#  model: deepseek-v3
-    api-url: https://token.sensenova.cn/v1/chat/completions
-    api-key: sk-qSZNwGD1Ohebv38WCUwWnu66YKMLqeeN
-    model: sensenova-6.7-flash-lite
+  api-url: ${AI_API_URL:https://token.sensenova.cn/v1/chat/completions}
+  api-key: ${AI_API_KEY:}
+  model: ${AI_MODEL:sensenova-6.7-flash-lite}
 
 # 文件上传路径配置
 file:
   upload:
-    path: /Users/cc/Downloads/项目/blog/blog-backend/files
+    path: ./files
 
 logging:
   level:

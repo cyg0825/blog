@@ -66,6 +66,9 @@ logs/
 blog-backend/files/*
 !blog-backend/files/.gitkeep
 
+# AI sensitive docs
+ai接入文档.txt
+
 # Temporary files
 *.tmp
 *.temp
