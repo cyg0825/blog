@@ -10,16 +10,26 @@
 # Maven
 target/
 !pom.xml
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+surefire-reports/
+test-output/
 
 # Node.js
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # Vue.js
 dist/
 build/
+.vite/
 
 # IDE
 .idea/
@@ -27,6 +37,11 @@ build/
 *.ipr
 *.iws
 .vscode/
+.project
+.classpath
+.settings/
+*.swp
+*.swo
 
 # OS
 .DS_Store
