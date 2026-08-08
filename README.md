@@ -2,7 +2,7 @@
 
 > 前后端分离 · 现代化UI设计 · 响应式布局 · AI智能功能
 >
-> 本项目基于 Spring Boot + Vue.js 进行二次开发
+> 本项目基于 Spring Boot + Vue.js 进行二开
 
 ---
 
