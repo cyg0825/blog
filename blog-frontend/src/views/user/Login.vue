@@ -60,7 +60,7 @@
           <span class="demo-label">演示账号</span>
           <div class="demo-btns">
             <el-button size="small" @click="fillDemo('admin','admin123')">管理员 admin</el-button>
-            <el-button size="small" @click="fillDemo('zhangwei','admin123')">用户 zhangwei</el-button>
+            <el-button size="small" @click="fillDemo('cc','admin123')">用户 cc</el-button>
           </div>
         </div>
 
